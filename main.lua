@@ -57,9 +57,9 @@ local function generate_days(year, month)
     return days
 end
 
-local function set_holidays(days, year, month, holidays)
+local function set_holidays(days, holidays)
     for d = 1, #days do
-        local ymd = year .. '/' .. month .. '/' .. d
+        local ymd = days[d]['year'] .. '/' .. days[d]['month'] .. '/' .. days[d]['day']
         if holidays[ymd] ~= nil then
             days[d]['is_holiday'] = true
             days[d]['name'] = holidays[ymd]
@@ -68,7 +68,7 @@ local function set_holidays(days, year, month, holidays)
     return days
 end
 
-local function format_calendar(days)
+local function format_calendar(days, now)
     local result = ''
     local holiday_names = ''
 
@@ -77,11 +77,13 @@ local function format_calendar(days)
     end
 
     for d = 1, #days do
-        if days[d]['wday'] == 0 then
+        if days[d]['year'] == now['year'] and days[d]['month'] == now['month'] and days[d]['day'] == now['day'] then -- 今日
+            result = result .. string.format('\x1b[7;30m%2d \x1b[0m', d)
+        elseif days[d]['wday'] == 0 then -- 日曜
             result = result .. string.format('\x1b[0;31m%2d \x1b[0m', d)
-        elseif days[d]['wday'] == 6 then
+        elseif days[d]['wday'] == 6 then -- 土曜
             result = result .. string.format('\x1b[0;34m%2d \x1b[0m', d)
-        elseif days[d]['is_holiday'] then
+        elseif days[d]['is_holiday'] then -- 祝日
             result = result .. string.format('\x1b[0;31m%2d \x1b[0m', d)
         else
             result = result .. string.format('%2d ', d)
@@ -99,12 +101,12 @@ local function format_calendar(days)
     return result
 end
 
-local function print_calendar(year, month, holidays)
+local function print_calendar(year, month, holidays, now)
     print(string.format('     %d年 %d月', year, month))
     print('日 月 火 水 木 金 土')
     local days = generate_days(year, month)
-    days = set_holidays(days, year, month, holidays)
-    print(format_calendar(days))
+    days = set_holidays(days, holidays)
+    print(format_calendar(days, now))
 end
 
 local execute_cmd = function(cmd)
@@ -176,7 +178,7 @@ local function main()
     local holidays = load_csv();
 
     for i = 1, 2 do
-        print_calendar(year, month, holidays)
+        print_calendar(year, month, holidays, now)
         if i ~= 2 then
             print()
         end
