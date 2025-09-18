@@ -4,8 +4,9 @@
 -[x] デフォルト年月をシステム日時から取得
 -[x] HTTPでsyukujitsu.csvを取得。ファイルに保存
 -[x] syukujitsu.csvをCP932からUTF-8に変換
--[ ] ファイルからsyukujitsu.csvを読み込み
--[ ] 祝日なら色づけ。名前を表示。
+-[x] ファイルからsyukujitsu.csvを読み込み
+-[x] 祝日なら色づけ。名前を表示。
+-[ ] 今日の背景を反転
 
 
 - [NeovimのためのLua入門 Lua基礎編](https://zenn.dev/slin/articles/2020-10-19-neovim-lua1)

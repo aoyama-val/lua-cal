@@ -45,6 +45,8 @@ local function generate_days(year, month)
     local wday = day_of_week(year, month, 1)
     for d = 1, dom do
         days[d] = {
+            year = year,
+            month = month,
             day = d,
             wday = wday,
             is_holiday = false,
@@ -55,31 +57,53 @@ local function generate_days(year, month)
     return days
 end
 
+local function set_holidays(days, year, month, holidays)
+    for d = 1, #days do
+        local ymd = year .. '/' .. month .. '/' .. d
+        if holidays[ymd] ~= nil then
+            days[d]['is_holiday'] = true
+            days[d]['name'] = holidays[ymd]
+        end
+    end
+    return days
+end
+
 local function format_calendar(days)
     local result = ''
+    local holiday_names = ''
+
     for i = 1, days[1]['wday'] do
         result = result .. '   '
     end
+
     for d = 1, #days do
         if days[d]['wday'] == 0 then
             result = result .. string.format('\x1b[0;31m%2d \x1b[0m', d)
         elseif days[d]['wday'] == 6 then
             result = result .. string.format('\x1b[0;34m%2d \x1b[0m', d)
+        elseif days[d]['is_holiday'] then
+            result = result .. string.format('\x1b[0;31m%2d \x1b[0m', d)
         else
             result = result .. string.format('%2d ', d)
         end
+
+        if days[d]['is_holiday'] then
+            holiday_names = holiday_names .. string.format(' %d:%s', d, days[d]['name'])
+        end
+
         if days[d]['wday'] == 6 then
-            result = result .. '\n'
+            result = result .. holiday_names .. '\n'
+            holiday_names = ''
         end
     end
     return result
 end
 
-local function print_calendar(year, month)
+local function print_calendar(year, month, holidays)
     print(string.format('     %d年 %d月', year, month))
     print('日 月 火 水 木 金 土')
     local days = generate_days(year, month)
-    -- print(dump(days))
+    days = set_holidays(days, year, month, holidays)
     print(format_calendar(days))
 end
 
@@ -112,6 +136,36 @@ local function download_csv_if_not_exist()
     execute_cmd(convert_cmd)
 end
 
+-- 文字列を分割
+-- https://stackoverflow.com/questions/1426954/split-string-in-lua#comment73602874_7615129
+local function split(inputstr, sep)
+    sep = sep or '%s' -- %s is any whitespace
+    local t = {}
+    for field,s in string.gmatch(inputstr, "([^"..sep.."]*)("..sep.."?)") do
+        table.insert(t,field)
+        if s == "" then
+            return t
+        end
+    end
+end
+
+local function load_csv()
+    local holidays = {}
+
+    local f = io.open(UTF8_CSV_PATH, 'r')
+    local lnum = 0
+    for line in f:lines() do
+        lnum = lnum + 1
+        if lnum ~= 1 then
+            local cols = split(line, ',')
+            holidays[cols[1]] = cols[2]
+        end
+    end
+    f:close()
+
+    return holidays
+end
+
 local function main()
     local now = os.date("*t", os.time())
     local month = arg[1] and tonumber(arg[1]) or now['month']
@@ -119,11 +173,10 @@ local function main()
 
     download_csv_if_not_exist()
 
-    -- print(is_leap_year(year))
-    -- print(days_of_month(year, month))
-    -- print(day_of_week(year, month, 1))
+    local holidays = load_csv();
+
     for i = 1, 2 do
-        print_calendar(year, month)
+        print_calendar(year, month, holidays)
         if i ~= 2 then
             print()
         end
