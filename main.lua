@@ -57,7 +57,13 @@ local function format_calendar(days)
         result = result .. '   '
     end
     for d = 1, #days do
-        result = result .. string.format('%2d ', d)
+        if days[d]['wday'] == 0 then
+            result = result .. string.format('\x1b[0;31m%2d \x1b[0m', d)
+        elseif days[d]['wday'] == 6 then
+            result = result .. string.format('\x1b[0;34m%2d \x1b[0m', d)
+        else
+            result = result .. string.format('%2d ', d)
+        end
         if days[d]['wday'] == 6 then
             result = result .. '\n'
         end
