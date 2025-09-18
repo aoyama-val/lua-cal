@@ -80,8 +80,9 @@ local function print_calendar(year, month)
 end
 
 local function main()
-    local month = tonumber(arg[1])
-    local year = tonumber(arg[2])
+    local now = os.date("*t", os.time())
+    local month = arg[1] and tonumber(arg[1]) or now['month']
+    local year = arg[2] and tonumber(arg[2]) or now['year']
     -- print(is_leap_year(year))
     -- print(days_of_month(year, month))
     -- print(day_of_week(year, month, 1))
