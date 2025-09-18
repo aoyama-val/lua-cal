@@ -111,6 +111,10 @@ end
 
 local execute_cmd = function(cmd)
     local handle = io.popen(cmd)
+    if handle == nil then
+        io.stderr:write('Failed to popen: ' .. cmd .. '\n')
+        os.exit(1)
+    end
     local result = handle:read('*a')
     handle:close()
     return result
@@ -155,6 +159,10 @@ local function load_csv()
     local holidays = {}
 
     local f = io.open(UTF8_CSV_PATH, 'r')
+    if f == nil then
+        io.stderr:write('Failed to open: ' .. UTF8_CSV_PATH .. '\n')
+        os.exit(1)
+    end
     local lnum = 0
     for line in f:lines() do
         lnum = lnum + 1
