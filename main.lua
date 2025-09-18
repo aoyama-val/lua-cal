@@ -1,3 +1,7 @@
+local CSV_URL = 'https://www8.cao.go.jp/chosei/shukujitsu/syukujitsu.csv'
+local CSV_PATH = '/tmp/syukujitsu.csv'
+local UTF8_CSV_PATH = '/tmp/syukujitsu_utf8.csv'
+
 -- オブジェクトの文字列表現を返す
 -- https://stackoverflow.com/questions/9168058/how-to-dump-a-table-to-console
 local function dump(o)
@@ -79,10 +83,42 @@ local function print_calendar(year, month)
     print(format_calendar(days))
 end
 
+local execute_cmd = function(cmd)
+    local handle = io.popen(cmd)
+    local result = handle:read('*a')
+    handle:close()
+    return result
+end
+
+local function file_exists(name)
+    local f = io.open(name, "r")
+    if f ~= nil then
+        io.close(f)
+        return true
+    else
+        return false
+    end
+end
+
+local function download_csv_if_not_exist()
+    if file_exists(UTF8_CSV_PATH) then
+        return
+    end
+
+    local cmd = 'curl --silent ' .. CSV_URL .. ' -o ' .. CSV_PATH
+    execute_cmd(cmd)
+
+    local convert_cmd = 'iconv -f CP932 -t UTF-8 < ' .. CSV_PATH .. ' > ' .. UTF8_CSV_PATH
+    execute_cmd(convert_cmd)
+end
+
 local function main()
     local now = os.date("*t", os.time())
     local month = arg[1] and tonumber(arg[1]) or now['month']
     local year = arg[2] and tonumber(arg[2]) or now['year']
+
+    download_csv_if_not_exist()
+
     -- print(is_leap_year(year))
     -- print(days_of_month(year, month))
     -- print(day_of_week(year, month, 1))

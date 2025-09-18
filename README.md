@@ -2,8 +2,8 @@
 -[x] 2ヶ月分表示
 -[x] 土日を色付け
 -[x] デフォルト年月をシステム日時から取得
--[ ] HTTPでsyukujitsu.csvを取得。ファイルに保存
--[ ] syukujitsu.csvをCP932からUTF-8に変換
+-[x] HTTPでsyukujitsu.csvを取得。ファイルに保存
+-[x] syukujitsu.csvをCP932からUTF-8に変換
 -[ ] ファイルからsyukujitsu.csvを読み込み
 -[ ] 祝日なら色づけ。名前を表示。
 
